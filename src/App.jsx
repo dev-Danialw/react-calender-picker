@@ -10,6 +10,7 @@ function App() {
   const [chosenType, setChosenType] = useState("start");
   const [selectedDate, setSelectedDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [hoverDate, setHoverDate] = useState(null);
 
   const handleDateClick = (chosenDay) => {
     // if user chose before our current range
@@ -35,13 +36,26 @@ function App() {
     }
   };
 
+  const checkInBetween = (day) => {
+    if (selectedDate && !endDate) return day > selectedDate && day < hoverDate;
+    if (endDate && !selectedDate) return day < endDate && day > hoverDate;
+
+    return day > selectedDate && day < endDate;
+  };
+
   return (
     <>
       <StyledDateChooser>
-        <StyledDateChooserButton onClick={() => setChosenType("start")}>
+        <StyledDateChooserButton
+          onClick={() => setChosenType("start")}
+          isChoosing={chosenType === "start"}
+        >
           Start Date <span>{selectedDate}</span>
         </StyledDateChooserButton>
-        <StyledDateChooserButton onClick={() => setChosenType("end")}>
+        <StyledDateChooserButton
+          onClick={() => setChosenType("end")}
+          isChoosing={chosenType === "end"}
+        >
           End Date <span>{endDate}</span>
         </StyledDateChooserButton>
       </StyledDateChooser>
@@ -49,14 +63,18 @@ function App() {
       <StyledCalendar>
         {calendarDates.map((day, index) => {
           const dayNumber = day + 1;
+
+          const inBetween = checkInBetween(dayNumber);
           const isSelected =
             dayNumber === selectedDate || dayNumber === endDate;
 
           return (
             <StyledCalendarDay
               key={index}
+              isInBetween={inBetween}
               isSelected={isSelected}
               onClick={() => handleDateClick(dayNumber)}
+              onMouseOver={() => setHoverDate(dayNumber)}
             >
               {dayNumber}
             </StyledCalendarDay>
@@ -117,9 +135,21 @@ const StyledCalendarDay = styled.button`
   background: none;
 
   ${(props) =>
+    props.isInBetween &&
+    css`
+      background: #6c92dd !important;
+      color: #eee;
+    `}
+
+  ${(props) =>
     props.isSelected &&
     css`
       background: #1a1a1a !important;
       color: #eee;
     `}
+
+  &:hover {
+    color: #eee;
+    background: #6c92dd;
+  }
 `;
